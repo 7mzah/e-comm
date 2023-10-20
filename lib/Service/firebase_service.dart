@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../Model/brand_model.dart';
 import '../Model/carousel_model.dart';
+import '../Model/product_category_model.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -68,6 +69,32 @@ class FirebaseService {
       // Handle error
       if (kDebugMode) {
         print('Failed to fetch carousel images: $error');
+      }
+      return [];
+    }
+  }
+
+  Future<List<CategoryModel>> fetchCategoriesForBrand(String brand) async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('Categories')
+          .where('brandName', isEqualTo: brand)
+          .get();
+
+      final List<CategoryModel> categories = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return CategoryModel(
+          categoryName: data['categoryName'],
+          imageUrl: data['imageUrl'],
+          brandName: data['brandName'],
+        );
+      }).toList();
+
+      return categories;
+    } catch (error) {
+      // Handle error
+      if (kDebugMode) {
+        print('Error fetching categories: $error');
       }
       return [];
     }

@@ -2,20 +2,19 @@ import 'package:firebase_ecom/Model/brand_model.dart';
 import 'package:firebase_ecom/Model/carousel_model.dart';
 import 'package:firebase_ecom/providers/brand_provider.dart';
 import 'package:firebase_ecom/widgets/shoppage/brandTile.dart';
+import 'package:firebase_ecom/widgets/shoppage/dummy_carousel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../Model/product_model.dart';
 import '../../providers/carousel_provider.dart';
-import '../../providers/product_provider.dart';
 import '../../widgets/shoppage/new_products_carousel.dart';
-import '../../widgets/shoppage/productTile.dart';
+import 'brandProductCategory/productCategoryPage.dart';
 
 class ShopPage extends StatefulWidget {
-  final List<ProductModel> products;
-
   const ShopPage(
-      {Key? key, required this.products, required List<BrandModel> brands, required List<CarouselModel> carousel})
+      {Key? key,
+      required List<BrandModel> brands,
+      required List<CarouselModel> carousel})
       : super(key: key);
 
   @override
@@ -23,16 +22,13 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
-  List<ProductModel> _filteredProducts = [];
   late List<BrandModel> _brands;
-  late List<CarouselModel> _carousel;
   final TextEditingController _searchController = TextEditingController();
   bool _showClearIcon = false; // Variable to control clear icon visibility
 
   @override
   void initState() {
     super.initState();
-    _filteredProducts = widget.products;
   }
 
   @override
@@ -44,21 +40,20 @@ class _ShopPageState extends State<ShopPage> {
   void _searchProducts(String query) {
     setState(() {
       _showClearIcon = query.isNotEmpty; // Update the clear icon visibility
-      _filteredProducts = widget.products
-          .where((product) =>
-              product.brandName.toLowerCase().contains(query.toLowerCase()) ||
-              product.phoneName.toLowerCase().contains(query.toLowerCase()))
-          .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<ProductProvider, BrandProvider, CarouselProvider>(
-      builder: (context, productProvider, brandProvider, carouselProvider, _) {
+    return Consumer2< BrandProvider, CarouselProvider>(
+      builder: (context, brandProvider, carouselProvider, _) {
         final List<CarouselModel> carousels = carouselProvider.carouselImages;
-        final List<ProductModel>? products = productProvider.products;
         _brands = brandProvider.brands;
+        if (_brands.isEmpty) {
+          // If _brands is null or empty, show a loading indicator or empty state
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final bool showCarousel = _searchController.text.isEmpty;
 
         // Sort the brands list
@@ -120,9 +115,9 @@ class _ShopPageState extends State<ShopPage> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 sliver: SliverToBoxAdapter(
-                  child: carousels != null && carousels.isNotEmpty
-                      ? NewProductsCarousel(newCarousel: carousels)
-                      : const Center(child: CircularProgressIndicator()),
+                  child: carousels.isEmpty
+                      ? const DummyCarousel()
+                      : NewProductsCarousel(newCarousel: carousels),
                 ),
               ),
             SliverList(
@@ -155,7 +150,18 @@ class _ShopPageState extends State<ShopPage> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     BrandModel brand = _brands[index];
-                    return BrandTile(brandModel: brand);
+                    return GestureDetector(
+                        onTap: () {
+                          // Navigate to the product category page when the brand is tapped
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductCategoryPage(brand: brand),
+                            ),
+                          );
+                        },
+                        child: BrandTile(brandModel: brand));
                   },
                   childCount: _brands.length,
                 ),

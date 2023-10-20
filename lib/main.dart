@@ -1,9 +1,10 @@
 import 'package:firebase_ecom/View/home_view.dart';
 import 'package:firebase_ecom/providers/carousel_provider.dart';
-import 'package:firebase_ecom/providers/product_provider.dart';
+import 'package:firebase_ecom/providers/categoryProvider.dart';
 import 'package:firebase_ecom/providers/brand_provider.dart'; // Import BrandProvider
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'Controller/home_controller.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
@@ -13,14 +14,18 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<ProductProvider>(
-          create: (context) => ProductProvider(),
+        ChangeNotifierProvider<CategoryProvider>(
+          create: (context) => CategoryProvider(),
         ),
-        ChangeNotifierProvider<BrandProvider>( // Add BrandProvider
+        ChangeNotifierProvider<BrandProvider>(
+          // Add BrandProvider
           create: (context) => BrandProvider(),
         ),
         ChangeNotifierProvider<CarouselProvider>(
           create: (context) => CarouselProvider(),
+        ),
+        Provider<HomeController>(
+          create: (_) => HomeController(),
         ),
       ],
       child: const MyApp(),

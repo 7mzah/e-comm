@@ -1,8 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ecom/Model/brand_model.dart';
-import 'package:firebase_ecom/Controller/home_controller.dart';
 import 'package:provider/provider.dart';
 import '../../providers/brand_provider.dart';
+import '../../Controller/home_controller.dart'; // Import HomeController
 
 class BrandTile extends StatefulWidget {
   final BrandModel brandModel;
@@ -14,27 +15,12 @@ class BrandTile extends StatefulWidget {
 }
 
 class BrandTileState extends State<BrandTile> {
-  final HomeController _homeController = HomeController();
   late Future<String> _imageUrlFuture;
-  String? _cachedImageUrl;
 
   @override
   void initState() {
     super.initState();
-    _imageUrlFuture = _fetchImageUrl();
-  }
-
-  Future<String> _fetchImageUrl() async {
-    if (_cachedImageUrl != null) {
-      // Return the cached image URL if available
-      return _cachedImageUrl!;
-    } else {
-      // Fetch the image URL from the database
-      final imageUrl = await _homeController.getImageUrl(widget.brandModel.brandImage);
-      // Cache the image URL for future use
-      _cachedImageUrl = imageUrl;
-      return imageUrl;
-    }
+    _imageUrlFuture = HomeController().getImageUrl(widget.brandModel.brandImage); // Use HomeController to fetch the image URL
   }
 
   @override
@@ -47,7 +33,7 @@ class BrandTileState extends State<BrandTile> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Container(
                 margin: const EdgeInsets.only(left: 16),
-                child: const CircularProgressIndicator(),
+                child: const Center(child: CircularProgressIndicator()),
               );
             }
             if (snapshot.hasError) {
@@ -67,9 +53,11 @@ class BrandTileState extends State<BrandTile> {
               child: Column(
                 children: [
                   Expanded(
-                    child: Image.network(
-                      imageUrl,
+                    child: CachedNetworkImage(
                       fit: BoxFit.fitWidth,
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
                     ),
                   ),
                 ],

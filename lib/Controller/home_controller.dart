@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import '../Model/brand_model.dart';
 import '../Model/carousel_model.dart';
+import '../Model/product_category_model.dart';
 
 class HomeController {
   final FirebaseService _firebaseService = FirebaseService();
@@ -44,6 +45,23 @@ class HomeController {
     catch(error){
       if(kDebugMode){
         print('Error fetching carousel: $error');
+      }
+      return [];
+    }
+  }
+
+  Future<List<CategoryModel>> fetchAllCategories(BrandModel brand) async {
+    try {
+      // Implement the logic to fetch categories for the given brand
+      // You can use brand.brandName or any other property of BrandModel to identify the brand
+      // Example:
+      // final categories = await someService.fetchCategoriesForBrand(brand.brandName);
+      // return categories;
+      return await _firebaseService.fetchCategoriesForBrand(brand.brandName);
+
+    } catch (error) {
+      if (kDebugMode) {
+        print('Error fetching categories: $error');
       }
       return [];
     }

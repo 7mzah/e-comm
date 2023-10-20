@@ -1,7 +1,7 @@
 import 'package:firebase_ecom/Controller/home_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_ecom/Model/carousel_model.dart';
-import 'package:firebase_ecom/Service/firebase_service.dart';
 
 class CarouselProvider with ChangeNotifier {
   final HomeController _homeController = HomeController();
@@ -33,5 +33,11 @@ class CarouselProvider with ChangeNotifier {
   void setCurrentSlideIndex(int index) {
     _currentSlideIndex = index;
     notifyListeners();
+  }
+
+  Future<void> preloadImages(BuildContext context) async {
+    for (var carousel in _carouselImages) {
+      await precacheImage(NetworkImage(carousel.image), context);
+    }
   }
 }

@@ -4,8 +4,6 @@ import 'package:firebase_ecom/Model/carousel_model.dart';
 import 'package:firebase_ecom/providers/carousel_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
 import '../../Controller/home_controller.dart';
 
 class NewProductsCarousel extends StatelessWidget {
@@ -21,51 +19,41 @@ class NewProductsCarousel extends StatelessWidget {
 
         return Column(
           children: [
-        CarouselSlider(
-        items: newCarousel.map((carousel) {
-          return Builder(
-            builder: (BuildContext context) {
-              return Container(
-                width: MediaQuery.of(context).size.width,
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: FutureBuilder<String>(
-                        future: HomeController().getImageUrl(carousel.image),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            // Show placeholder image while loading
-                            return Container(
-                              color: Colors.white, // or any desired color
-                              // You can also use a placeholder image instead of a color
-                              // child: Image.asset('assets/placeholder_image.png'),
-                            );
-                          } else if (snapshot.hasData) {
-                            // Image loaded, display the actual image
-                            return Image.network(snapshot.data!);
-                          } else if (snapshot.hasError) {
-                            return const Text('Error loading image');
-                          } else {
-                            return const CircularProgressIndicator();
-                          }
-                        },
+            CarouselSlider(
+              items: newCarousel.map((carousel) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: FutureBuilder<String>(
+                              future:
+                                  HomeController().getImageUrl(carousel.image),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  // Image loaded, display the actual image
+                                  return CachedNetworkImage(
+                                      imageUrl: snapshot.data!);
+                                } else if (snapshot.hasError) {
+                                  return const Text('Error loading image');
+                                } else {
+                                  return const Center(child: CircularProgressIndicator());
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        }).toList(),
-        // Carousel options...
+                    );
+                  },
+                );
+              }).toList(),
+              // Carousel options...
 
-
-
-
-
-
-        options: CarouselOptions(
+              options: CarouselOptions(
                 height: 210,
                 initialPage: 0,
                 enlargeCenterPage: true,
